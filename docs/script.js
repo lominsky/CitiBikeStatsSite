@@ -59,7 +59,6 @@ firebase.database().ref('ebikes').on('value', function(snapshot) {
 		.append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-	for(i in data) {
 	    // Add X axis --> it is a date format
 	    let x = d3.scaleTime()
 	      .domain(d3.extent(data, function(d) { return d.date; }))
@@ -87,7 +86,6 @@ firebase.database().ref('ebikes').on('value', function(snapshot) {
 		        .x(function(d) { return x(d.date) })
 		        .y(function(d) { return y(d.value) })
 	    	)
-	};
 });
 
 //Bikes Available Listener
