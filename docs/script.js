@@ -54,8 +54,7 @@ firebase.database().ref('ebikes').on('value', function(snapshot) {
 	document.getElementById("ebikeGraph").innerHTML = "";
 	let svg = d3.select("#ebikeGraph")
 		.append("svg")
-		.attr("width", width + margin.left + margin.right)
-		.attr("height", height + margin.top + margin.bottom)
+  		.attr("viewBox", '0 0 800 400')
 		.append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -218,14 +217,13 @@ function displayBikes() {
 	// set the dimensions and margins of the graph
 	let margin = {top: 10, right: 30, bottom: 30, left: 60},
 	    width = 800 - margin.left - margin.right,
-	    height = 460 - margin.top - margin.bottom;
+	    height = 400 - margin.top - margin.bottom;
 
 	// append the svg object to the body of the page
 	document.getElementById("bikeGraph").innerHTML = "";
 	let svg = d3.select("#bikeGraph")
 		.append("svg")
-		.attr("width", width + margin.left + margin.right)
-	    .attr("height", height + margin.top + margin.bottom)
+  		.attr("viewBox", '0 0 800 400')
 		.append("g")
 	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -333,14 +331,13 @@ function displayDocks() {
 	// set the dimensions and margins of the graph
 	let margin = {top: 10, right: 30, bottom: 30, left: 60},
 	    width = 800 - margin.left - margin.right,
-	    height = 460 - margin.top - margin.bottom;
+	    height = 400 - margin.top - margin.bottom;
 
 	// append the svg object to the body of the page
 	document.getElementById("dockGraph").innerHTML = "";
 	let svg = d3.select("#dockGraph")
 		.append("svg")
-		.attr("width", width + margin.left + margin.right)
-	    .attr("height", height + margin.top + margin.bottom)
+  		.attr("viewBox", '0 0 800 400')
 		.append("g")
 	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -359,7 +356,7 @@ function displayDocks() {
 
 	svg.append("g")
 		.attr("transform", "translate(0," + height + ")")
-		.call(d3.axisBottom(x).ticks(5));
+		.call(d3.axisBottom(x));
 
 	// Add Y axis
 	let y = d3.scaleLinear()
@@ -499,8 +496,7 @@ function displayPointsGraph(data, divID) {
 	document.getElementById(divID).innerHTML = "";
 	let svg = d3.select("#" + divID)
 		.append("svg")
-		.attr("width", width + margin.left + margin.right)
-	    .attr("height", height + margin.top + margin.bottom)
+  		.attr("viewBox", '0 0 800 460')
 		.append("g")
 	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -570,16 +566,135 @@ const median = arr => {
 
 //Leaderboard Listener
 firebase.database().ref('leaderboard').on('value', function(snapshot) {
-	// console.log("Leaderboard");
-	// console.log(snapshot.val());
+	let times = snapshot.val();
+
+	let data = [];
+	for(t in times) {
+		for(l in times[t]) {
+			let leader = times[t][l];
+			let datum = {
+				date: parseInt(t),
+				name: leader.user,
+				value: leader.points
+			}
+			data.push(datum);
+		}
+	}
+
+	// set the dimensions and margins of the graph
+	let margin = {top: 30, right: 0, bottom: 30, left: 50},
+	    width = 210 - margin.left - margin.right,
+	    height = 210 - margin.top - margin.bottom;
+
+	// group the data: I want to draw one line per group
+	let sumstat = d3.nest() // nest function allows to group the calculation per level of a factor
+		.key(function(d) { return d.name;})
+		.entries(data);
+
+	// What is the list of groups?
+	allKeys = sumstat.map(function(d){return d.key})
+
+	// Add an svg element for each group. The will be one beside each other and will go on the next row when no more room available
+	document.getElementById("leaderboardGraph").innerHTML = "";
+	let svg = d3.select("#leaderboardGraph")
+		.selectAll("uniqueChart")
+		.data(sumstat)
+		.enter()
+		.append("svg")
+		.attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom)
+		.append("g")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	// Add X axis --> it is a date format
+	let x = d3.scaleTime()
+		.domain(d3.extent(data, function(d) { return d.date; }))
+		.range([ 0, width ]);
+	
+	svg.append("g")
+		.attr("transform", "translate(0," + height + ")")
+		.call(d3.axisBottom(x).ticks(3));
+
+	//Add Y axis
+	let y = d3.scaleLinear()
+		.domain([0, d3.max(data, function(d) { return +d.value; })])
+		.range([ height, 0 ]);
+	
+	svg.append("g")
+		.call(d3.axisLeft(y).ticks(6));
+
+	// color palette
+	let color = d3.scaleOrdinal()
+		.domain(allKeys)
+		.range(['#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#a65628','#f781bf','#999999'])
+
+	// Draw the line
+	svg.append("path")
+		.attr("fill", "none")
+		.attr("stroke", function(d){ return color(d.key) })
+		.attr("stroke-width", 1.9)
+		.attr("d", function(d){
+			return d3.line()
+				.x(function(d) { return x(d.date); })
+				.y(function(d) { return y(+d.value); })
+			(d.values)
+		});
+
+	// Add titles
+	svg.append("text")
+		.attr("text-anchor", "start")
+		.attr("y", -5)
+		.attr("x", 0)
+		.text(function(d){ return(d.key)})
+		.style("fill", function(d){ return color(d.key) })
+
 });
 
 // //Stations Listener
 firebase.database().ref('stations').on('value', function(snapshot) {
-	// console.log("Station Info");
-	// console.log(snapshot.val());
+	//Handle ebike wavers
+	handleEbikeWavers(snapshot.val());
 	// set the dimensions and margins of the graph
 });
+
+function handleEbikeWavers(stations) {
+	// let ebikeWaivers = ["hello", "how", "are", "you"];
+	let ebikeWaivers = [];
+	let mostRecentTime = 0;
+	let mostRecentStation;
+	for(i in stations) {
+		let s = stations[i];
+		let n = s.name
+		let waivers = s.ebike_surcharge_waiver
+		let waiverTimes = Object.keys(waivers);
+		let lastWaiverTime = parseInt(waiverTimes[waiverTimes.length-1]);
+
+		if(waivers[lastWaiverTime]) {
+			// console.log(s);
+			if(mostRecentTime < lastWaiverTime) {
+				mostRecentTime = lastWaiverTime;
+			}
+			let nVals = Object.values(n);
+			ebikeWaivers.push(nVals[nVals.length-1]);
+		}
+	}
+	let timestamp = new Date(mostRecentTime);
+	let ul = document.getElementById("ebikeWaiverList");
+	let span = document.getElementById("ebikeWaiverTime")
+	span.innerText = timestamp.toLocaleTimeString();
+
+	ul.innerHTML = "";
+	for(i in ebikeWaivers) {
+		let li = document.createElement("li");
+		li.innerText = ebikeWaivers[i];
+		ul.append(li);
+	}
+	if(ebikeWaivers.length == 0) {
+		document.getElementById("ebikeWaiverDiv").setAttribute("hidden", "true");
+	} else {
+		document.getElementById("ebikeWaiverDiv").removeAttribute("hidden");
+	}
+}
 
 
 //Handle the page display
