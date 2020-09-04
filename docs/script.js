@@ -216,7 +216,7 @@ function displayBikes() {
 
 
 	// set the dimensions and margins of the graph
-	let margin = {top: 10, right: 30, bottom: 30, left: 30},
+	let margin = {top: 10, right: 30, bottom: 30, left: 60},
 	    width = 800 - margin.left - margin.right,
 	    height = 460 - margin.top - margin.bottom;
 
@@ -331,7 +331,7 @@ function displayDocks() {
 	}
 
 	// set the dimensions and margins of the graph
-	let margin = {top: 10, right: 30, bottom: 30, left: 30},
+	let margin = {top: 10, right: 30, bottom: 30, left: 60},
 	    width = 800 - margin.left - margin.right,
 	    height = 460 - margin.top - margin.bottom;
 
@@ -522,8 +522,13 @@ function displayPointsGraph(data, divID) {
 		.call(d3.axisBottom(x));
 
 	// Add Y axis
+	let min = d3.min(data, function(d) { return +d.value; });
+	let max = d3.max(data, function(d) { return +d.value; })
+	// if(min < max/2) min = 0;
+	// else min = max - min;
+	min = 0;
 	let y = d3.scaleLinear()
-		.domain([0, d3.max(data, function(d) { return +d.value; })])
+		.domain([min, max*1.2])
 		.range([ height, 30 ]);
 
 	svg.append("g")
