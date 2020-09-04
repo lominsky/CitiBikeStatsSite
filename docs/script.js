@@ -700,6 +700,7 @@ function handleEbikeWavers(stations) {
 //Handle the page display
 displayHandler();
 function displayHandler() {
+	document.getElementById("sidebarMenu").classList.remove("show");
 	let hash = window.location.hash;
 	if(hash == "") hash = "#";
 
