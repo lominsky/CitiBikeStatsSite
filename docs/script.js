@@ -46,7 +46,7 @@ firebase.database().ref('ebikes').on('value', function(snapshot) {
 
 	// console.log("eBikes");
 	// set the dimensions and margins of the graph
-	let margin = {top: 10, right: 30, bottom: 30, left: 60},
+	let margin = {top: 10, right: 30, bottom: 30, left: 30},
 	    width = 800 - margin.left - margin.right,
 	    height = 400 - margin.top - margin.bottom;
 
@@ -216,7 +216,7 @@ function displayBikes() {
 
 
 	// set the dimensions and margins of the graph
-	let margin = {top: 10, right: 30, bottom: 30, left: 60},
+	let margin = {top: 10, right: 30, bottom: 30, left: 30},
 	    width = 800 - margin.left - margin.right,
 	    height = 460 - margin.top - margin.bottom;
 
@@ -331,7 +331,7 @@ function displayDocks() {
 	}
 
 	// set the dimensions and margins of the graph
-	let margin = {top: 10, right: 30, bottom: 30, left: 60},
+	let margin = {top: 10, right: 30, bottom: 30, left: 30},
 	    width = 800 - margin.left - margin.right,
 	    height = 460 - margin.top - margin.bottom;
 
@@ -403,7 +403,7 @@ firebase.database().ref('angel').on('value', function(snapshot) {
 
 
 	// set the dimensions and margins of the graph
-	let margin = {top: 10, right: 30, bottom: 30, left: 60},
+	let margin = {top: 10, right: 30, bottom: 30, left: 30},
 	    width = 800 - margin.left - margin.right,
 	    height = 460 - margin.top - margin.bottom;
 
@@ -491,7 +491,7 @@ firebase.database().ref('angel').on('value', function(snapshot) {
 
 function displayPointsGraph(data, divID) {
 	// set the dimensions and margins of the graph
-	let margin = {top: 10, right: 30, bottom: 30, left: 60},
+	let margin = {top: 10, right: 30, bottom: 30, left: 30},
     width = 800 - margin.left - margin.right,
     height = 460 - margin.top - margin.bottom;
 
