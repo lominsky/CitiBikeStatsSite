@@ -629,124 +629,23 @@ firebase.database().ref('leaderboard').on('value', function(snapshot) {
 // //Stations Listener
 firebase.database().ref('stations').on('value', function(snapshot) {
 	handleEbikeWavers(snapshot.val());
-	generateStationList(snapshot.val());
 });
 
-let stationList = {}
-function generateStationList(stations) {
-	let list = document.getElementById("stationList");
-	list.style.height = (window.innerHeight * 75 / 100) + "px";
-
-	let listVals = [];
-
-	for(i in stations) {
-		let s = stations[i];
-
-		let installed = Object.values(s.installed);
-		installed = installed[installed.length - 1];
-
-		if(!installed) continue;
-
-		let capacity = Object.values(s.capacity);
-		let coordinates = Object.values(s.coordinates);
-		let ebike_surcharge_waiver = Object.values(s.ebike_surcharge_waiver);
-		let name = Object.values(s.name);
-		let renting = Object.values(s.renting);
-		let returning = Object.values(s.returning);
-		let valet_status = Object.values(s.valet_status);
-
-		listVals.push({
-			id: i,
-			name: name[name.length - 1]
-		});
-
-		stationList[i] = {
-			capacity: capacity[capacity.length - 1],
-			ebike_surcharge_waiver: ebike_surcharge_waiver[ebike_surcharge_waiver.length - 1],
-			coordinates: coordinates[coordinates.length - 1],
-			name: name[name.length - 1],
-			renting: renting[renting.length - 1],
-			returning: returning[returning.length - 1],
-			valet_status: valet_status[valet_status.length - 1]
-		}
-	}
-
-	// sort by name
-	listVals.sort(function(a, b) {
-	  var nameA = a.name.toUpperCase(); // ignore upper and lowercase
-	  var nameB = b.name.toUpperCase(); // ignore upper and lowercase
-	  if (nameA < nameB) {
-	    return -1;
-	  }
-	  if (nameA > nameB) {
-	    return 1;
-	  }
-	  return 0;
-	});
-
-	// updateStationDisplay(listVals[0].id);
-
-	for(i in listVals) {
-		let li = document.createElement("li");
-		li.innerText = listVals[i].name;
-		li.classList.add("list-group-item");
-		li.classList.add("stationListItem");
-		li.setAttribute("onclick", "updateStationDisplay(" + listVals[i].id + ")");
-		li.setAttribute("data", listVals[i].id);
-		list.append(li);
-	}
-}
-
-function updateStationDisplay(id) {
-	let s = stationList[id];
-	document.getElementById("stationDetails").removeAttribute("hidden");
-	let li = document.getElementsByClassName("stationListItem");
-	for(i in li) {
-		if(!isElement(li[i])) continue;
-		if(li[i].getAttribute("data") == id) { li[i].classList.add("active"); }
-		else  { li[i].classList.remove("active"); }
-	}
-
-	document.getElementById("stationName").innerText = s.name;
-	document.getElementById("stationCapacity").innerText = "Capacity: " + s.capacity;
-	let renting = "❌";
-	if(s.renting) renting = "✅";
-	document.getElementById("stationRenting").innerText = renting;
-	let returning = "❌";
-	if(s.returning) returning = "✅";
-	document.getElementById("stationReturning").innerText = returning;
-	let waiver = "❌";
-	if(s.ebike_surcharge_waiver) waiver = "✅";
-	document.getElementById("stationWaiver").innerText = waiver;
-	let valet = "❌";
-	if(s.valet_status) valet = "✅";
-	document.getElementById("stationValet").innerText = valet;
-}
 
 function handleEbikeWavers(stations) {
-	// let ebikeWaivers = ["hello", "how", "are", "you"];
-	let ebikeWaivers = [];
-	let mostRecentTime = 0;
-	let mostRecentStation;
+	let ebikeWaivers = ["hello", "how", "are", "you"];
+	// let ebikeWaivers = [];
 	for(i in stations) {
 		let s = stations[i];
-		let n = s.name
-		let waivers = s.ebike_surcharge_waiver
-		let waiverTimes = Object.keys(waivers);
-		let lastWaiverTime = parseInt(waiverTimes[waiverTimes.length-1]);
+		let name = s.name
+		let waiver = s.ebike_surcharge_waiver;
 
-		if(waivers[lastWaiverTime]) {
-			if(mostRecentTime < lastWaiverTime) {
-				mostRecentTime = lastWaiverTime;
-			}
-			let nVals = Object.values(n);
-			ebikeWaivers.push(nVals[nVals.length-1]);
+		if(waiver) {
+			ebikeWaivers.push(name);
 		}
 	}
-	let timestamp = new Date(mostRecentTime);
+
 	let ul = document.getElementById("ebikeWaiverList");
-	let span = document.getElementById("ebikeWaiverTime")
-	span.innerText = timestamp.toLocaleTimeString();
 
 	ul.innerHTML = "";
 	for(i in ebikeWaivers) {
