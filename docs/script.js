@@ -537,9 +537,11 @@ function generateStationsTable(e) {
 	table.innerHTML = "";
 
 	let stationsArray = [];
+	let url = "https://www.google.com/maps/search/?api=1&query="
 	for(i in stationsData) {
 		let s = stationsData[i];
     	if(!s.installed) continue;
+ 
 		let temp = {
 			name: s.name,
 			capacity: s.capacity,
@@ -549,9 +551,11 @@ function generateStationsTable(e) {
 			returning: "✅",
 			valet: "❌",
 			angel_points: s.bike_angels_points,
-			angel_action: ""
+			angel_action: "",
+			lat: s.coordinates[1],
+			lon: s.coordinates[0],
 		};
-		// console.log(s, temp)
+		temp.url = url + temp.lat + ", " + temp.lon;
 		if(s.capacity == 0) temp.bikes = 0;
 		if(s.capacity == 0) temp.docks = 0;
 		if(!s.renting) temp.renting = "❌";
@@ -599,7 +603,7 @@ function generateStationsTable(e) {
 		var cell7 = row.insertCell(7);
     	var cell8 = row.insertCell(8);
 
-		cell0.innerText = s.name;
+		cell0.innerHTML = "<a href=\"" + s.url + "\" class=\"stationMapLink\" target=\"_blank\">" + s.name + "</a>";
 		cell1.innerText = s.capacity;
 		cell2.innerText = s.bikes.toFixed(0) + "%";
 		cell3.innerText = s.docks.toFixed(0) + "%";

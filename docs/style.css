@@ -55,6 +55,9 @@ th>.active {
   margin-bottom: 12px; /* Add some space below the input */
 }
 
+.stationMapLink {
+  color: #000;
+}
 
 /*
  * Sidebar
