@@ -451,6 +451,16 @@ firebase.database().ref('leaderboard').on('value', function(snapshot) {
 		.key(function(d) { return d.name;})
 		.entries(data);
 
+	sumstat.sort(function(a, b) {
+	  a = Object.values(a.values);
+	  b = Object.values(b.values);
+
+	  a = a[a.length-1].value;
+	  b = b[b.length-1].value;
+
+	  return b - a;
+	});
+
 	// What is the list of groups?
 	allKeys = sumstat.map(function(d){return d.key})
 
