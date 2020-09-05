@@ -155,50 +155,42 @@ firebase.database().ref('ebikes').on('value', function(snapshot) {
 
 });
 
-//Bikes Available Listener
-let bikes = {
-	available: [],
-	disabled: []
-};
-firebase.database().ref('bikes_available').on('value', function(snapshot) {
-	let val = snapshot.val();
-	bikes.available = [];
-	for(i in val) {
-		let datum = {
+//Bikes and docks Listener
+firebase.database().ref('bikes_and_docks').on('value', function(snapshot) {
+	let bd = snapshot.val();
+
+	let bikesAndDocks = {
+		bikes: [],
+		docks: []
+	}
+	for(i in bd) {
+		bikesAndDocks.bikes.push({
 			name: "available",
 			date: i,
-			value: val[i]
-		};
-		bikes.available.push(datum);
-	}
-	displayBikes();
-});
-
-//Bikes Disabled Listener
-firebase.database().ref('bikes_disabled').on('value', function(snapshot) {
-	let val = snapshot.val();
-	bikes.disabled = [];
-	for(i in val) {
-		let datum = {
+			value: bd[i].bikes_available
+		});
+		bikesAndDocks.bikes.push({
 			name: "disabled",
 			date: i,
-			value: val[i]
-		};
-		bikes.disabled.push(datum);
+			value: bd[i].bikes_disabled
+		});
+		bikesAndDocks.docks.push({
+			name: "available",
+			date: i,
+			value: bd[i].docks_available
+		});
+		bikesAndDocks.docks.push({
+			name: "disabled",
+			date: i,
+			value: bd[i].docks_disabled
+		});
 	}
-	displayBikes();
+	displayDocksAndBikes(bikesAndDocks.docks, "dockGraph", "Docks");
+	displayDocksAndBikes(bikesAndDocks.bikes, "bikeGraph", "Bikes");
 });
 
 //Display Bikes
-function displayBikes() {
-	let data = [];
-	
-	for(i in bikes.available) {
-		data.push(bikes.available[i])
-	}
-	for(i in bikes.disabled) {
-		data.push(bikes.disabled[i])
-	}
+function displayDocksAndBikes(data, elementId, itemName) {
 
 	// set the dimensions and margins of the graph
 	let margin = {top: 10, right: 30, bottom: 30, left: 60},
@@ -206,116 +198,8 @@ function displayBikes() {
 	    height = 400 - margin.top - margin.bottom;
 
 	// append the svg object to the body of the page
-	document.getElementById("bikeGraph").innerHTML = "";
-	let svg = d3.select("#bikeGraph")
-		.append("svg")
-  		.attr("viewBox", '0 0 800 400')
-		.append("g")
-	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-	// group the data: I want to draw one line per group
-	let sumstat = d3.nest() // nest function allows to group the calculation per level of a factor
-		.key(function(d) { return d.name;})
-		.entries(data);
-
-	// Add X axis --> it is a date format
-	let x = d3.scaleTime()
-		.domain(d3.extent(data, function(d) { return d.date; }))
-		.range([ 0, width ]);
-
-	svg.append("g")
-		.attr("transform", "translate(0," + height + ")")
-		.call(d3.axisBottom(x));
-
-	// Add Y axis
-	let y = d3.scaleLinear()
-		.domain([0, d3.max(data, function(d) { return +d.value; })])
-		.range([ height, 30 ]);
-
-	svg.append("g")
-		.call(d3.axisLeft(y));
-
-	// color palette
-	let res = sumstat.map(function(d){ return d.name }) // list of group names
-	let color = d3.scaleOrdinal()
-		.domain(res)
-		.range(['#e41a1c','#00bbee'])
-
-	svg.append("circle").attr("cx",0).attr("cy",15).attr("r", 6).style("fill", "#00bbee")
-	svg.append("circle").attr("cx",150).attr("cy",15).attr("r", 6).style("fill", "#e41a1c")
-	svg.append("text").attr("x", 15).attr("y", 15).text("Available Bikes").style("font-size", "15px").attr("alignment-baseline","middle")
-	svg.append("text").attr("x", 165).attr("y", 15).text("Disabled Bikes").style("font-size", "15px").attr("alignment-baseline","middle")
-
-
-	// Draw the line
-	svg.selectAll(".line")
-	  .data(sumstat)
-	  .enter()
-	  .append("path")
-	    .attr("fill", "none")
-	    .attr("stroke", function(d){ return color(d.key) })
-	    .attr("stroke-width", 1.5)
-	    .attr("d", function(d){
-	      return d3.line()
-	        .x(function(d) { return x(d.date); })
-	        .y(function(d) { return y(+d.value); })
-	        (d.values)
-	    })
-}
-
-//Docks Available Listener
-let docks = {
-	available: [],
-	disabled: []
-};
-firebase.database().ref('docks_available').on('value', function(snapshot) {
-	let val = snapshot.val();
-	docks.available = [];
-	for(i in val) {
-		let datum = {
-			name: "available",
-			date: i,
-			value: val[i]
-		};
-		docks.available.push(datum);
-	}
-	displayDocks();
-});
-
-// Docks Disabled Listener
-firebase.database().ref('docks_disabled').on('value', function(snapshot) {
-	let val = snapshot.val();
-	docks.disabled = [];
-	for(i in val) {
-		let datum = {
-			name: "disabled",
-			date: i,
-			value: val[i]
-		};
-		docks.disabled.push(datum);
-	}
-	displayDocks();
-});
-
-//Display Bikes
-function displayDocks() {
-	let data = [];
-	
-	for(i in docks.available) {
-		data.push(docks.available[i])
-	}
-	for(i in docks.disabled) {
-		data.push(docks.disabled[i])
-	}
-
-	// set the dimensions and margins of the graph
-	let margin = {top: 10, right: 30, bottom: 30, left: 60},
-	    width = 800 - margin.left - margin.right,
-	    height = 400 - margin.top - margin.bottom;
-
-	// append the svg object to the body of the page
-	document.getElementById("dockGraph").innerHTML = "";
-	let svg = d3.select("#dockGraph")
+	document.getElementById(elementId).innerHTML = "";
+	let svg = d3.select("#" + elementId)
 		.append("svg")
   		.attr("viewBox", '0 0 800 400')
 		.append("g")
@@ -352,8 +236,8 @@ function displayDocks() {
 
 	svg.append("circle").attr("cx",0).attr("cy",15).attr("r", 6).style("fill", "#00bbee")
 	svg.append("circle").attr("cx",150).attr("cy",15).attr("r", 6).style("fill", "#e41a1c")
-	svg.append("text").attr("x", 15).attr("y", 15).text("Available Docks").style("font-size", "15px").attr("alignment-baseline","middle")
-	svg.append("text").attr("x", 165).attr("y", 15).text("Disabled Docks").style("font-size", "15px").attr("alignment-baseline","middle")
+	svg.append("text").attr("x", 15).attr("y", 15).text("Available " + itemName).style("font-size", "15px").attr("alignment-baseline","middle")
+	svg.append("text").attr("x", 165).attr("y", 15).text("Disabled " + itemName).style("font-size", "15px").attr("alignment-baseline","middle")
 
 
 	// Draw the line
@@ -627,14 +511,147 @@ firebase.database().ref('leaderboard').on('value', function(snapshot) {
 });
 
 // //Stations Listener
+var stationsData;
 firebase.database().ref('stations').on('value', function(snapshot) {
 	handleEbikeWavers(snapshot.val());
+
+
+	stationsData = snapshot.val();
+	generateStationsTable()
+
+    
 });
+
+var alphaOrder = true;
+var sortBy = "name";
+function generateStationsTable(e) {
+	if(e) {
+		if(sortBy == e.getAttribute("sortby")) {
+			alphaOrder = !alphaOrder;
+		} else {
+			sortBy = e.getAttribute("sortby");
+			alphaOrder = true;
+		}
+	}
+	let table = document.getElementById("stationsTable");
+	table.innerHTML = "";
+
+	let stationsArray = [];
+	for(i in stationsData) {
+		let s = stationsData[i];
+    	if(!s.installed) continue;
+		let temp = {
+			name: s.name,
+			capacity: s.capacity,
+			bikes: s.bikes_available/s.capacity * 100,
+			docks: s.docks_available/s.capacity * 100,
+			renting: "✅",
+			returning: "✅",
+			valet: "❌",
+			angel_points: s.bike_angels_points,
+			angel_action: ""
+		};
+		// console.log(s, temp)
+		if(s.capacity == 0) temp.bikes = 0;
+		if(s.capacity == 0) temp.docks = 0;
+		if(!s.renting) temp.renting = "❌";
+		if(!s.returning) temp.returning = "❌";
+		if(s.valet != "none") temp.returning = "✅";
+		if(s.bike_angels_action == "take") {
+			temp.angel_action = "⬆️";
+		} else if(s.bike_angels_action == "give") {
+			temp.angel_action = "⬇️";
+		}
+
+		stationsArray.push(temp);
+	}
+	// sort by name
+	stationsArray.sort(function(a, b) {
+	  var A = a[sortBy];
+	  var B = b[sortBy];
+	  if (A < B) {
+	  	if(alphaOrder) {
+	  		return -1;
+	  	}
+	  	return 1;
+	  } else if (A > B) {
+	  	if(alphaOrder) {
+	  		return 1;
+	  	}
+	  	return -1;
+	  } else {
+	  	return 0;
+	  }
+	});
+
+    for(i in stationsArray) {
+    	let s = stationsArray[i];
+
+    	let row = table.insertRow(-1);
+
+    	var cell0 = row.insertCell(0);
+		var cell1 = row.insertCell(1);
+    	var cell2 = row.insertCell(2);
+		var cell3 = row.insertCell(3);
+    	var cell4 = row.insertCell(4);
+		var cell5 = row.insertCell(5);
+    	var cell6 = row.insertCell(6);
+		var cell7 = row.insertCell(7);
+    	var cell8 = row.insertCell(8);
+
+		cell0.innerText = s.name;
+		cell1.innerText = s.capacity;
+		cell2.innerText = s.bikes.toFixed(0) + "%";
+		cell3.innerText = s.docks.toFixed(0) + "%";
+		cell4.innerText = s.renting;
+		cell5.innerText = s.returning;
+		cell6.innerText = s.valet;
+		cell7.innerText = s.angel_points;
+		cell8.innerText = s.angel_action;
+    }
+
+    let headers = document.getElementsByTagName("th");
+    for(i in headers) {
+    	let h = headers[i];
+    	if(!isElement(h)) continue;
+    	console.log();
+    	if(h.getAttribute("sortby") == sortBy) {
+    		h.style.color = "rgb(25, 150, 225)";
+    		alphaOrder ? h.children[0].innerHTML = "&#x25B2;" : h.children[0].innerHTML = "&#x25BC;";
+    	} else {
+    		h.style.color = "#000";
+    		h.children[0].innerHTML = "";
+    	}
+    }
+    filterTable();
+}
+
+function filterTable() {
+  // Declare variables
+  var input, filter, table, tr, td, i, txtValue;
+  input = document.getElementById("filterInput");
+  filter = input.value.toUpperCase();
+  table = document.getElementById("stationsTable");
+  tr = table.getElementsByTagName("tr");
+
+  // Loop through all table rows, and hide those who don't match the search query
+  for (i = 0; i < tr.length; i++) {
+    td = tr[i].getElementsByTagName("td")[0];
+    if (td) {
+      txtValue = td.textContent || td.innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    }
+  }
+}
 
 
 function handleEbikeWavers(stations) {
-	let ebikeWaivers = ["hello", "how", "are", "you"];
-	// let ebikeWaivers = [];
+	// let ebikeWaivers = ["hello", "how", "are", "you"];
+	let ebikeWaivers = [];
 	for(i in stations) {
 		let s = stations[i];
 		let name = s.name

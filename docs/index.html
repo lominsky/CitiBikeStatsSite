@@ -64,7 +64,7 @@
                   Docks <span class="sr-only"></span>
                 </a>
               </li>
-              <li class="nav-item" hidden>
+              <li class="nav-item">
                 <a class="nav-link" href="#stations">
                   <span data-feather="list"></span>
                   Stations
@@ -191,6 +191,24 @@
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
             <h1 class="h2">Stations</h1>
           </div>
+
+        <input type="text" id="filterInput" onkeyup="filterTable()" placeholder="Search for names...">
+        <table>
+          <thead>
+            <th onclick="generateStationsTable(this)" sortBy="name">Name<span class="sortDir"></span></th>
+            <th onclick="generateStationsTable(this)" sortBy="capacity">Capacity<span class="sortDir"></span></th>
+            <th onclick="generateStationsTable(this)" sortBy="bikes">Bikes Available<span class="sortDir"></span></th>
+            <th onclick="generateStationsTable(this)" sortBy="docks">Docks Available<span class="sortDir"></span></th>
+            <th onclick="generateStationsTable(this)" sortBy="renting">Renting Bikes<span class="sortDir"></span></th>
+            <th onclick="generateStationsTable(this)" sortBy="returing">Accepting Bikes<span class="sortDir"></span></th>
+            <th onclick="generateStationsTable(this)" sortBy="valet">Valet<span class="sortDir"></span></th>
+            <th onclick="generateStationsTable(this)" sortBy="angel_points">Angel Points<span class="sortDir"></span></th>
+            <th onclick="generateStationsTable(this)" sortBy="angel_action">Angel Actions<span class="sortDir"></span></th>
+          </thead>
+          <tbody id="stationsTable">
+          </tbody>
+        </table>
+
         </main>
       </div>
     </div>
