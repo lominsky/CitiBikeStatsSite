@@ -12,6 +12,11 @@ body {
   vertical-align: text-bottom;
 }
 
+#stationList {
+  /*max-height: 500px;*/
+  overflow: auto;
+}
+
 /*
  * Sidebar
  */

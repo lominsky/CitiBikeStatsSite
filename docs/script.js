@@ -23,12 +23,10 @@ firebase.database().ref('ebikes').on('value', function(snapshot) {
 			value: 0
 		};
 
-
 		for(s in ebikes[i]) {
 			datum.value += ebikes[i][s];
 		}
 
-		// console.log(datum);
 		data.push(datum);
 
 		if(data[data.length-1].value > data[maxIndex].value) maxIndex = data.length-1;
@@ -43,8 +41,6 @@ firebase.database().ref('ebikes').on('value', function(snapshot) {
 	document.getElementById("ebikesMaxDate").innerHTML = maxTime.toLocaleDateString();
 	document.getElementById("ebikesMaxCount").innerHTML = data[maxIndex].value;
 
-
-	// console.log("eBikes");
 	// set the dimensions and margins of the graph
 	let margin = {top: 10, right: 30, bottom: 30, left: 30},
 	    width = 800 - margin.left - margin.right,
@@ -165,7 +161,6 @@ let bikes = {
 	disabled: []
 };
 firebase.database().ref('bikes_available').on('value', function(snapshot) {
-	// console.log("Bikes Available");
 	let val = snapshot.val();
 	bikes.available = [];
 	for(i in val) {
@@ -181,7 +176,6 @@ firebase.database().ref('bikes_available').on('value', function(snapshot) {
 
 //Bikes Disabled Listener
 firebase.database().ref('bikes_disabled').on('value', function(snapshot) {
-	// console.log("Bikes Disabled");
 	let val = snapshot.val();
 	bikes.disabled = [];
 	for(i in val) {
@@ -197,7 +191,6 @@ firebase.database().ref('bikes_disabled').on('value', function(snapshot) {
 
 //Display Bikes
 function displayBikes() {
-	// console.log(bikes);
 	let data = [];
 	
 	for(i in bikes.available) {
@@ -206,13 +199,6 @@ function displayBikes() {
 	for(i in bikes.disabled) {
 		data.push(bikes.disabled[i])
 	}
-
-	// let currentTime = new Date(parseInt(data[data.length - 1].date));
-	// document.getElementById("ebikesCurrentTime").innerHTML = currentTime.toLocaleTimeString();
-	// document.getElementById("ebikesCurrentCount").innerHTML = data[data.length - 1].value;
-
-	// console.log(data);
-
 
 	// set the dimensions and margins of the graph
 	let margin = {top: 10, right: 30, bottom: 30, left: 60},
@@ -227,13 +213,10 @@ function displayBikes() {
 		.append("g")
 	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-
 	// group the data: I want to draw one line per group
 	let sumstat = d3.nest() // nest function allows to group the calculation per level of a factor
 		.key(function(d) { return d.name;})
 		.entries(data);
-
-	// console.log(sumstat);
 
 	// Add X axis --> it is a date format
 	let x = d3.scaleTime()
@@ -286,7 +269,6 @@ let docks = {
 	disabled: []
 };
 firebase.database().ref('docks_available').on('value', function(snapshot) {
-	// console.log("Docks Available");
 	let val = snapshot.val();
 	docks.available = [];
 	for(i in val) {
@@ -302,7 +284,6 @@ firebase.database().ref('docks_available').on('value', function(snapshot) {
 
 // Docks Disabled Listener
 firebase.database().ref('docks_disabled').on('value', function(snapshot) {
-	// console.log("Docks Available");
 	let val = snapshot.val();
 	docks.disabled = [];
 	for(i in val) {
@@ -318,7 +299,6 @@ firebase.database().ref('docks_disabled').on('value', function(snapshot) {
 
 //Display Bikes
 function displayDocks() {
-	// console.log(bikes);
 	let data = [];
 	
 	for(i in docks.available) {
@@ -346,8 +326,6 @@ function displayDocks() {
 	let sumstat = d3.nest() // nest function allows to group the calculation per level of a factor
 		.key(function(d) { return d.name;})
 		.entries(data);
-
-	// console.log(sumstat);
 
 	// Add X axis --> it is a date format
 	let x = d3.scaleTime()
@@ -506,8 +484,6 @@ function displayPointsGraph(data, divID) {
 		.key(function(d) { return d.name;})
 		.entries(data);
 
-	// console.log(sumstat);
-
 	// Add X axis --> it is a date format
 	let x = d3.scaleTime()
 		.domain(d3.extent(data, function(d) { return d.date; }))
@@ -652,10 +628,100 @@ firebase.database().ref('leaderboard').on('value', function(snapshot) {
 
 // //Stations Listener
 firebase.database().ref('stations').on('value', function(snapshot) {
-	//Handle ebike wavers
 	handleEbikeWavers(snapshot.val());
-	// set the dimensions and margins of the graph
+	generateStationList(snapshot.val());
 });
+
+let stationList = {}
+function generateStationList(stations) {
+	let list = document.getElementById("stationList");
+	list.style.height = (window.innerHeight * 75 / 100) + "px";
+
+	let listVals = [];
+
+	for(i in stations) {
+		let s = stations[i];
+
+		let installed = Object.values(s.installed);
+		installed = installed[installed.length - 1];
+
+		if(!installed) continue;
+
+		let capacity = Object.values(s.capacity);
+		let coordinates = Object.values(s.coordinates);
+		let ebike_surcharge_waiver = Object.values(s.ebike_surcharge_waiver);
+		let name = Object.values(s.name);
+		let renting = Object.values(s.renting);
+		let returning = Object.values(s.returning);
+		let valet_status = Object.values(s.valet_status);
+
+		listVals.push({
+			id: i,
+			name: name[name.length - 1]
+		});
+
+		stationList[i] = {
+			capacity: capacity[capacity.length - 1],
+			ebike_surcharge_waiver: ebike_surcharge_waiver[ebike_surcharge_waiver.length - 1],
+			coordinates: coordinates[coordinates.length - 1],
+			name: name[name.length - 1],
+			renting: renting[renting.length - 1],
+			returning: returning[returning.length - 1],
+			valet_status: valet_status[valet_status.length - 1]
+		}
+	}
+
+	// sort by name
+	listVals.sort(function(a, b) {
+	  var nameA = a.name.toUpperCase(); // ignore upper and lowercase
+	  var nameB = b.name.toUpperCase(); // ignore upper and lowercase
+	  if (nameA < nameB) {
+	    return -1;
+	  }
+	  if (nameA > nameB) {
+	    return 1;
+	  }
+	  return 0;
+	});
+
+	// updateStationDisplay(listVals[0].id);
+
+	for(i in listVals) {
+		let li = document.createElement("li");
+		li.innerText = listVals[i].name;
+		li.classList.add("list-group-item");
+		li.classList.add("stationListItem");
+		li.setAttribute("onclick", "updateStationDisplay(" + listVals[i].id + ")");
+		li.setAttribute("data", listVals[i].id);
+		list.append(li);
+	}
+}
+
+function updateStationDisplay(id) {
+	let s = stationList[id];
+	document.getElementById("stationDetails").removeAttribute("hidden");
+	let li = document.getElementsByClassName("stationListItem");
+	for(i in li) {
+		if(!isElement(li[i])) continue;
+		if(li[i].getAttribute("data") == id) { li[i].classList.add("active"); }
+		else  { li[i].classList.remove("active"); }
+	}
+
+	document.getElementById("stationName").innerText = s.name;
+	document.getElementById("stationCapacity").innerText = "Capacity: " + s.capacity;
+	let renting = "❌";
+	if(s.renting) renting = "✅";
+	document.getElementById("stationRenting").innerText = renting;
+	let returning = "❌";
+	if(s.returning) returning = "✅";
+	document.getElementById("stationReturning").innerText = returning;
+	let waiver = "❌";
+	if(s.ebike_surcharge_waiver) waiver = "✅";
+	document.getElementById("stationWaiver").innerText = waiver;
+	let valet = "❌";
+	if(s.valet_status) valet = "✅";
+	document.getElementById("stationValet").innerText = valet;
+}
 
 function handleEbikeWavers(stations) {
 	// let ebikeWaivers = ["hello", "how", "are", "you"];
@@ -670,7 +736,6 @@ function handleEbikeWavers(stations) {
 		let lastWaiverTime = parseInt(waiverTimes[waiverTimes.length-1]);
 
 		if(waivers[lastWaiverTime]) {
-			// console.log(s);
 			if(mostRecentTime < lastWaiverTime) {
 				mostRecentTime = lastWaiverTime;
 			}
@@ -719,7 +784,6 @@ function displayHandler() {
 	let mains = document.getElementsByTagName("main");
 	for(i in mains) {
 		if(!isElement(mains[i])) continue;
-		// console.log(mains[i].id);
 
 		if(mains[i].id == hash.substring(1)) {
 			mains[i].removeAttribute("hidden");
